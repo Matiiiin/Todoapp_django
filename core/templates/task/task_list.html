@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Task Lists</title>
+</head>
+<body>
+{% for task in object_list %}
+    {{ task.id }} <br>
+<span style="margin-right: 20px;">
+    <a href="{% url 'tasks:task-detail' pk=task.id %}">{{ task.title }}</a>
+</span>
+<span>{{ task.status }}</span>
+
+    <br>
+    Author: {{ task.author }} <br>
+    <a href="{% url 'tasks:task-edit' pk=task.id %}">Edit</a>
+    <a href="{% url 'tasks:task-delete' pk=task.id %}">Delete</a>
+    <hr>
+{% endfor %}
+<a href="{% url 'tasks:task-create' %}">Create Task</a>
+<form action="{% url 'logout' %}" method="post">
+    {% csrf_token %}
+    <button type="submit">logout</button>
+</form>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Task Details</title>
+</head>
+<body>
+    <h1>ID: {{ object.id }}</h1>
+    <p>Title: {{ object.title }}</p>
+    <p>Status: {{ object.status }}</p>
+    <form method="post" action="{% url 'tasks:update_task_status' object.id %}">
+        {% csrf_token %}
+        <label for="status">Status:</label>
+        <select name="status" id="status">
+            <option value="DONE" {% if object.status == 'DONE' %}selected{% endif %}>Done</option>
+            <option value="NEW" {% if object.status == 'NEW' %}selected{% endif %}>New</option>
+        </select>
+        <button type="submit">Change Status</button>
+    </form>
+</body>
+</html>
