@@ -1,0 +1,9 @@
+services:
+  todoapp:
+    container_name: 'todoapp'
+    restart: on-failure
+    build: .
+    volumes:
+      - ./core:/app
+    ports:
+      - 8000:8000
