@@ -4,8 +4,9 @@ import sys
 from accounts.models import User
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.generics import GenericAPIView
+from rest_framework.views import APIView
 from rest_framework.decorators import action
-from .serializers import RegisterSerializer ,ForgetPasswordConfirmSerializer,ForgetPasswordSerializer,VerifyAccountResendSerializer,LoginSerializer ,JWTCreateSerializer , JWTRefreshSerializer
+from .serializers import RegisterSerializer ,CustomTokenLoginSerializer,ForgetPasswordConfirmSerializer,ForgetPasswordSerializer,VerifyAccountResendSerializer,LoginSerializer ,JWTCreateSerializer , JWTRefreshSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate , login ,logout
@@ -21,7 +22,10 @@ from django.conf import settings
 from accounts.utils import RabbitMQConnection
 import uuid
 from django.contrib.auth.hashers import check_password
-
+from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth.decorators import login_required
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authtoken.models import Token
 
 class AuthUserViewSet(GenericViewSet):
     """
@@ -32,6 +36,10 @@ class AuthUserViewSet(GenericViewSet):
             return RegisterSerializer
         elif self.action == 'login':
             return LoginSerializer
+    def get_permissions(self):
+        if self.action == 'logout':
+            return [IsAuthenticated()]
+        return []
     @swagger_auto_schema(
         method='post',
         request_body=RegisterSerializer,
@@ -97,15 +105,15 @@ class AuthUserViewSet(GenericViewSet):
         return Response(serializer.errors ,status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
-        method='get',
+        method='post',
         responses={
             200: "User logged out successfully",
         },
     )
-    @action(methods=["GET",],detail=False)
+    @action(methods=["POST",],detail=False)
     def logout(self, request):
         logout(request)
-        return Response(data='User logged out', status=status.HTTP_200_OK)
+        return Response(data={'detail':'User logged out successfully'}, status=status.HTTP_200_OK)
 class JWTCreateView(GenericAPIView):
     """
     Create a JWT token for user
@@ -134,6 +142,23 @@ class JWTRefreshView(GenericAPIView):
             }
             return Response(data , status=status.HTTP_200_OK)
         return Response(serializer.errors, status =status.HTTP_400_BAD_REQUEST)
+class CustomTokenLoginView(ObtainAuthToken):
+    serializer_class = CustomTokenLoginSerializer
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data,
+                                           context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({
+            'token': token.key,
+            'user_id': user.pk,
+            'email': user.email
+        })
+class CustomTokenLogoutView(APIView):
+    def post(self , request):
+        request.user.auth_token.delete()
+        return Response({'detail':'User logged out successfully'})
 class VerifyAccountView(GenericAPIView):
     """
     Verify User with incoming generated JWT
