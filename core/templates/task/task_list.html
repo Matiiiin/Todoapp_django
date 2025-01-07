@@ -19,7 +19,7 @@
     <hr>
 {% endfor %}
 <a href="{% url 'tasks:task-create' %}">Create Task</a>
-<form action="{% url 'logout' %}" method="post">
+<form action="{% url 'accounts:logout' %}" method="post">
     {% csrf_token %}
     <button type="submit">logout</button>
 </form>

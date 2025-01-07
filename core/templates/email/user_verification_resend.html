@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <title>Email Verification Resend</title>
+</head>
+<body>
+{#here localhost is configured based on smtp4dev port(5000) which im unable to use dtl tags#}
+<img src="http://localhost:8000/media/image/email/email_verification_image.png" alt="email verification image" width="300px" height="300px">
+<p>Please click <a href="http://localhost:8000/accounts/api/v1/verify-account/{{ token }} " target="_blank">here</a> to activate your account:</p><br>
+
+</body>
+</html>

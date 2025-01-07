@@ -5,5 +5,62 @@ services:
     build: .
     volumes:
       - ./core:/app
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=rabbituser
+      - RABBITMQ_PASS=rabbitpass
     ports:
       - 8000:8000
+    networks:
+      - todoapp_network
+  smtp4dev:
+    image: rnwood/smtp4dev:v3
+    restart: always
+    ports:
+      - '5000:80'
+      - '25:25'
+      - '143:143'
+    volumes:
+        - ./smtp4dev-data:/smtp4dev
+    environment:
+      - ServerOptions__Urls=http://*:80
+      - ServerOptions__HostName=smtp4dev
+    networks:
+      - todoapp_network
+  rabbitmq:
+    container_name: rabbitmq
+    hostname: rabbitmq
+    image: rabbitmq:4-management
+    environment:
+      - RABBITMQ_DEFAULT_USER=rabbituser
+      - RABBITMQ_DEFAULT_PASS=rabbitpass
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - ./rabbitmq/data/:/var/lib/rabbitmq/
+      - ./rabbitmq/log/:/var/log/rabbitmq
+    networks:
+      - todoapp_network
+  send_email_service:
+    container_name: send_email_service
+    restart: on-failure
+    build: ./send_email_service
+    volumes:
+      - ./send_email_service:/app
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=rabbituser
+      - RABBITMQ_PASS=rabbitpass
+      - EMAIL_USE_TLS = False
+      - EMAIL_HOST = 'smtp4dev'
+      - EMAIL_HOST_USER = ''
+      - EMAIL_HOST_PASSWORD = ''
+      - EMAIL_PORT = 25
+    networks:
+      - todoapp_network
+networks:
+  todoapp_network:
+    name: todoapp_network
+    driver: bridge
+    external: true

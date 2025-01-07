@@ -17,6 +17,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path ,include
 from accounts import views
+from django.conf.urls.static import static
+from django.conf import settings
 
 from django.urls import re_path
 from rest_framework import permissions
@@ -36,8 +38,7 @@ schema_view = get_schema_view(
 )
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("accounts/", include("django.contrib.auth.urls")),
-    path("users/", include("accounts.urls")),
+    path("accounts/", include("accounts.urls")),
     path('' ,views.HomePageView.as_view(),name='homepage'),
     path('tasks/' ,include('task.urls'))
 
@@ -48,3 +49,4 @@ swagger_routes = [
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
 urlpatterns += swagger_routes
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

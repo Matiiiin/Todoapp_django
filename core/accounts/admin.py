@@ -36,10 +36,10 @@ class UserChangeForm(forms.ModelForm):
 class UserAdmin(BaseUserAdmin):
     add_form = UserCreationForm
     form = UserChangeForm
-    list_display = ['email','is_superuser' ,'is_staff']
+    list_display = ['email','is_superuser' ,'is_staff' , 'is_verified']
     fieldsets = [
         ('Personal info' ,{'fields' : ['email']}),
-        ('Permissions' ,{'fields':['is_superuser' , 'is_staff' ,'is_active' ,'groups' , 'user_permissions']}),
+        ('Permissions' ,{'fields':['is_superuser' , 'is_staff' ,'is_active','is_verified' ,'groups' , 'user_permissions']}),
         ('Password Management',{'fields' :['password']})
     ]
     add_fieldsets = [
