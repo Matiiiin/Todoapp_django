@@ -1,6 +1,7 @@
 import pika
 from threading import Lock
 
+
 class RabbitMQConnection:
     _instance = None
     _lock = Lock()
@@ -12,11 +13,10 @@ class RabbitMQConnection:
                     cls._instance = super().__new__(cls)
         return cls._instance
 
-    def __init__(self, host='localhost', username='guest', password='guest'):
-        if not hasattr(self, 'connection'):
+    def __init__(self, host="localhost", username="guest", password="guest"):
+        if not hasattr(self, "connection"):
             credentials = pika.PlainCredentials(username, password)
             self.connection = pika.BlockingConnection(
                 pika.ConnectionParameters(host=host, credentials=credentials)
             )
             self.channel = self.connection.channel()
-
