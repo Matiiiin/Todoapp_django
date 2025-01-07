@@ -143,6 +143,9 @@ class JWTRefreshView(GenericAPIView):
             return Response(data , status=status.HTTP_200_OK)
         return Response(serializer.errors, status =status.HTTP_400_BAD_REQUEST)
 class CustomTokenLoginView(ObtainAuthToken):
+    """
+    login with a generated token for user in database
+    """
     serializer_class = CustomTokenLoginSerializer
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data,
@@ -156,6 +159,9 @@ class CustomTokenLoginView(ObtainAuthToken):
             'email': user.email
         })
 class CustomTokenLogoutView(APIView):
+    """
+        delete the token and log out from application
+    """
     def post(self , request):
         request.user.auth_token.delete()
         return Response({'detail':'User logged out successfully'})
@@ -207,6 +213,9 @@ class VerifyAccountResendView(GenericAPIView):
             return Response({'detail':'Verification email has been sent'} , status=status.HTTP_200_OK)
         return Response(serializer.errors , status=status.HTTP_400_BAD_REQUEST)
 class ForgetPasswordView(GenericAPIView):
+    """
+    class for getting user email and send temporary pass for resetting the password
+    """
     serializer_class = ForgetPasswordSerializer
     def post(self , request):
         serializer = self.get_serializer(data = request.data)
@@ -232,6 +241,9 @@ class ForgetPasswordView(GenericAPIView):
             return Response({'detail':'Reset password email has been sent'} , status=status.HTTP_200_OK)
         return Response(serializer.errors , status=status.HTTP_400_BAD_REQUEST)
 class ForgetPasswordConfirmView(GenericAPIView):
+    """
+    submitting the new pass provided by user in database
+    """
     serializer_class = ForgetPasswordConfirmSerializer
     def post(self , request , token):
         serializer = self.get_serializer(data = request.data)
