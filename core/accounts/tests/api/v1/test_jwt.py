@@ -46,7 +46,7 @@ class TestJWTCreateApi:
 @pytest.mark.django_db
 class TestJWTRefreshApi:
     url = reverse('accounts:api-v1:jwt-refresh')
-    def test_jwt_refresh_create_with_valid_access_token(self ,api_client ,common_user):
+    def test_jwt_access_create_with_valid_refresh_token(self ,api_client ,common_user):
         user = common_user
         user.is_verified = True
         user.save()
@@ -56,3 +56,13 @@ class TestJWTRefreshApi:
         }
         response = api_client.post(self.url , data=data)
         assert response.status_code == 200
+    def test_jwt_access_create_with_invalid_refresh_token(self ,api_client ,common_user):
+        user = common_user
+        user.is_verified = True
+        user.save()
+        invalid_refresh_token ='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM2NjY0NTI5LCJpYXQiOjE3MzY2NjQyMjksImp0aSI6IjczNzIyZGE0YmVkZDQyOGI5OTasdEwNzExM2E3ODRhNTY5IiwidXNlcl9pZCI6MX0.2BBi7tiWMDfwkyieeTGGCStPCXM3EZS8YecD5yrapbs'
+        data = {
+            'refresh':invalid_refresh_token
+        }
+        response = api_client.post(self.url , data=data)
+        assert response.status_code == 400

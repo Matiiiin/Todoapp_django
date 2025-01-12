@@ -109,6 +109,12 @@ class JWTRefreshSerializer(serializers.Serializer):
             return data
         except TokenError as e:
             raise serializers.ValidationError({"detail": e})
+        except jwt.exceptions.InvalidSignatureError as e:
+            raise serializers.ValidationError({"detail": e})
+        except jwt.exceptions.DecodeError as e:
+            raise serializers.ValidationError({"detail": e})
+        except jwt.exceptions.ExpiredSignatureError as e:
+            raise serializers.ValidationError({"detail": e})
 
 
 class VerifyAccountResendSerializer(serializers.Serializer):
@@ -170,10 +176,10 @@ class CustomTokenLoginSerializer(serializers.Serializer):
             # backend.)
             if not user:
                 msg = _("Unable to log in with provided credentials.")
-                raise serializers.ValidationError(msg, code="authorization")
+                raise serializers.ValidationError({'detail':msg}, code="authorization")
         else:
             msg = _('Must include "username" and "password".')
-            raise serializers.ValidationError(msg, code="authorization")
+            raise serializers.ValidationError({'detail':msg}, code="authorization")
 
         attrs["user"] = user
         return attrs

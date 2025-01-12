@@ -201,7 +201,7 @@ class CustomTokenLoginView(ObtainAuthToken):
         user = serializer.validated_data["user"]
         token, created = Token.objects.get_or_create(user=user)
         return Response(
-            {"token": token.key, "user_id": user.pk, "email": user.email}
+            {"token": token.key, "user_id": user.pk, "email": user.email} ,status=status.HTTP_200_OK
         )
 
 
@@ -212,8 +212,11 @@ class CustomTokenLogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        request.user.auth_token.delete()
-        return Response({"detail": "User logged out successfully"})
+        try:
+            request.user.auth_token.delete()
+            return Response({"detail": "User logged out successfully"} ,status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'detail':e} , status=status.HTTP_400_BAD_REQUEST)
 
 
 class VerifyAccountView(GenericAPIView):
