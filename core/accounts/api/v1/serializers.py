@@ -130,24 +130,33 @@ class ForgetPasswordConfirmSerializer(serializers.Serializer):
     new_password = serializers.CharField(required=True, write_only=True)
 
     def validate(self, attrs):
-        data = super().validate(attrs)
-        url_token = self.context.get("request").resolver_match.kwargs.get(
-            "token"
-        )
-        token = jwt.decode(
-            url_token, settings.SECRET_KEY, algorithms=["HS256"]
-        )
-        user = get_object_or_404(User, pk=token.get("user_id"))
-        if not user.is_verified:
-            raise serializers.ValidationError(
-                {"detail": "You are not verified"}
+        try:
+            data = super().validate(attrs)
+            url_token = self.context.get("request").resolver_match.kwargs.get(
+                "token"
             )
-        if not user.check_password(attrs.get("temporary_password")):
-            raise serializers.ValidationError(
-                {"detail": "Temporary password is incorrect"}
+            token = jwt.decode(
+                url_token, settings.SECRET_KEY, algorithms=["HS256"]
             )
-        data["user"] = user
-        return data
+            user = get_object_or_404(User, pk=token.get("user_id"))
+            if not user.is_verified:
+                raise serializers.ValidationError(
+                    {"detail": "You are not verified"}
+                )
+            if not user.check_password(attrs.get("temporary_password")):
+                raise serializers.ValidationError(
+                    {"detail": "Temporary password is incorrect"}
+                )
+            data["user"] = user
+            return data
+        except TokenError as e:
+            raise serializers.ValidationError({"detail": e})
+        except jwt.exceptions.InvalidSignatureError as e:
+            raise serializers.ValidationError({"detail": e})
+        except jwt.exceptions.DecodeError as e:
+            raise serializers.ValidationError({"detail": e})
+        except jwt.exceptions.ExpiredSignatureError as e:
+            raise serializers.ValidationError({"detail": e})
 
 
 class CustomTokenLoginSerializer(serializers.Serializer):
@@ -176,10 +185,14 @@ class CustomTokenLoginSerializer(serializers.Serializer):
             # backend.)
             if not user:
                 msg = _("Unable to log in with provided credentials.")
-                raise serializers.ValidationError({'detail':msg}, code="authorization")
+                raise serializers.ValidationError(
+                    {"detail": msg}, code="authorization"
+                )
         else:
             msg = _('Must include "username" and "password".')
-            raise serializers.ValidationError({'detail':msg}, code="authorization")
+            raise serializers.ValidationError(
+                {"detail": msg}, code="authorization"
+            )
 
         attrs["user"] = user
         return attrs
