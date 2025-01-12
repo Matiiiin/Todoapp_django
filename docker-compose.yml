@@ -11,8 +11,8 @@ services:
       - RABBITMQ_PASS=rabbitpass
     ports:
       - 8000:8000
-    networks:
-      - todoapp_network
+#    networks:
+#      - todoapp_network
   smtp4dev:
     image: rnwood/smtp4dev:v3
     restart: always
@@ -25,8 +25,8 @@ services:
     environment:
       - ServerOptions__Urls=http://*:80
       - ServerOptions__HostName=smtp4dev
-    networks:
-      - todoapp_network
+#    networks:
+#      - todoapp_network
   rabbitmq:
     container_name: rabbitmq
     hostname: rabbitmq
@@ -40,8 +40,8 @@ services:
     volumes:
       - ./rabbitmq/data/:/var/lib/rabbitmq/
       - ./rabbitmq/log/:/var/log/rabbitmq
-    networks:
-      - todoapp_network
+#    networks:
+#      - todoapp_network
   send_email_service:
     container_name: send_email_service
     restart: on-failure
@@ -57,10 +57,10 @@ services:
       - EMAIL_HOST_USER = ''
       - EMAIL_HOST_PASSWORD = ''
       - EMAIL_PORT = 25
-    networks:
-      - todoapp_network
-networks:
-  todoapp_network:
-    name: todoapp_network
-    driver: bridge
-    external: true
+#    networks:
+#      - todoapp_network
+#networks:
+#  todoapp_network:
+#    name: todoapp_network
+#    driver: bridge
+#    external: true
