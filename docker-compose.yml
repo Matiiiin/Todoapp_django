@@ -11,6 +11,8 @@ services:
       - RABBITMQ_PASS=rabbitpass
     ports:
       - 8000:8000
+    depends_on:
+      - rabbitmq
 #    networks:
 #      - todoapp_network
   smtp4dev:
@@ -57,6 +59,8 @@ services:
       - EMAIL_HOST_USER = ''
       - EMAIL_HOST_PASSWORD = ''
       - EMAIL_PORT = 25
+    depends_on:
+      - rabbitmq
 #    networks:
 #      - todoapp_network
 #networks:
