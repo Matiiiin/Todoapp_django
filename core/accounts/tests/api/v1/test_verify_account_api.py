@@ -19,7 +19,7 @@ def api_client():
 @pytest.fixture
 def common_user():
     user = get_user_model().objects.create_user(
-        email="test@test.com", password="123"
+        email="tests@tests.com", password="123"
     )
     return user
 
@@ -31,14 +31,14 @@ class TestVerifyAccountResendRequestApi:
     def test_verify_account_resend_api_with_valid_data(
         self, api_client, common_user
     ):
-        data = {"email": "test@test.com"}
+        data = {"email": "tests@tests.com"}
         response = api_client.post(self.url, data=data)
         assert response.status_code == 200
 
     def test_verify_account_resend_api_with_invalid_data(
         self, api_client, common_user
     ):
-        data = {"email": "test2@test.com"}
+        data = {"email": "test2@tests.com"}
         response = api_client.post(self.url, data=data)
         assert response.status_code == 404
 

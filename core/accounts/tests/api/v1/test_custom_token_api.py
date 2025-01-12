@@ -15,7 +15,7 @@ def api_client():
 @pytest.fixture
 def common_user():
     user = get_user_model().objects.create_user(
-        email="test@test.com", password="123"
+        email="tests@tests.com", password="123"
     )
     return user
 
@@ -25,7 +25,7 @@ class TestCustomTokenLoginApi:
     url = reverse("accounts:api-v1:token-login")
 
     def test_token_login_with_valid_credentials(self, api_client, common_user):
-        data = {"email": "test@test.com", "password": "123"}
+        data = {"email": "tests@tests.com", "password": "123"}
         response = api_client.post(self.url, data=data)
         assert response.status_code == 200
         assert "token" in response.json()
@@ -35,7 +35,7 @@ class TestCustomTokenLoginApi:
     def test_token_login_with_invalid_credentials(
         self, api_client, common_user
     ):
-        data = {"email": "test@test.com", "password": "1234"}
+        data = {"email": "tests@tests.com", "password": "1234"}
         response = api_client.post(self.url, data=data)
         assert response.status_code == 400
 

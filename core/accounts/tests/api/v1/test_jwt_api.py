@@ -19,7 +19,7 @@ def api_client():
 @pytest.fixture
 def common_user():
     user = get_user_model().objects.create_user(
-        email="test@test.com", password="123"
+        email="tests@tests.com", password="123"
     )
     return user
 
@@ -33,7 +33,7 @@ class TestJWTCreateApi:
         user.is_verified = True
         user.save()
         data = {
-            "email": "test@test.com",
+            "email": "tests@tests.com",
             "password": "123",
         }
         response = api_client.post(self.url, data=data)
@@ -44,7 +44,7 @@ class TestJWTCreateApi:
         user.is_verified = True
         user.save()
         data = {
-            "email": "test@test.com",
+            "email": "tests@tests.com",
             "password": "1234",
         }
         response = api_client.post(self.url, data=data)

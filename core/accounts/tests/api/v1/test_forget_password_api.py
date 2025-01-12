@@ -20,7 +20,7 @@ def api_client():
 @pytest.fixture
 def common_user():
     user = get_user_model().objects.create_user(
-        email="test@test.com", password="123"
+        email="tests@tests.com", password="123"
     )
     return user
 
@@ -32,14 +32,14 @@ class TestForgetPasswordRequestApi:
     def test_forget_password_api_with_valid_data(
         self, api_client, common_user
     ):
-        data = {"email": "test@test.com"}
+        data = {"email": "tests@tests.com"}
         response = api_client.post(self.url, data=data)
         assert response.status_code == 200
 
     def test_forget_password_api_with_invalid_data(
         self, api_client, common_user
     ):
-        data = {"email": "testt@test.com"}
+        data = {"email": "testt@tests.com"}
         response = api_client.post(self.url, data=data)
         assert response.status_code == 404
 

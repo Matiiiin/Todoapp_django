@@ -13,7 +13,7 @@ def api_client():
 @pytest.fixture
 def common_user():
     user = get_user_model().objects.create_user(
-        email="test@test.com", password="123"
+        email="tests@tests.com", password="123"
     )
     return user
 
@@ -24,7 +24,7 @@ class TestRegisterApi:
 
     def test_register_api_with_valid_data(self, api_client):
         data = {
-            "email": "test@test.com",
+            "email": "tests@tests.com",
             "password1": "123",
             "password2": "123",
         }
@@ -37,7 +37,7 @@ class TestRegisterApi:
 
     def test_register_api_with_invalid_data(self, api_client):
         data = {
-            "email": "test@test.com",
+            "email": "tests@tests.com",
             "password1": "123",
         }
         response = api_client.post(self.url, data=data)
@@ -52,7 +52,7 @@ class TestLoginApi:
         user = common_user
         user.is_verified = True
         user.save()
-        data = {"email": "test@test.com", "password": "123"}
+        data = {"email": "tests@tests.com", "password": "123"}
         response = api_client.post(self.url, data=data)
         assert response.status_code == 200
 
@@ -60,13 +60,13 @@ class TestLoginApi:
         user = common_user
         user.is_verified = True
         user.save()
-        data = {"email": "test@test.com", "password": "1234"}
+        data = {"email": "tests@tests.com", "password": "1234"}
         response = api_client.post(self.url, data=data)
         assert response.status_code == 400
 
     def test_login_api_with_unverified_user(self, api_client, common_user):
         user = common_user
-        data = {"email": "test@test.com", "password": "1234"}
+        data = {"email": "tests@tests.com", "password": "1234"}
         response = api_client.post(self.url, data=data)
         assert response.status_code == 400
 
