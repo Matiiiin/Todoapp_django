@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "accounts",
     "task",
+    "weather",
     "rest_framework",
     "rest_framework.authtoken",
     "django_filters",
@@ -171,3 +172,14 @@ CELERY_BROKER_URL = 'redis://redis:6379/1'
 CELERY_TIMEZONE = "Asia/Tehran"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://redis:6379/",
+        "OPTIONS": {
+            "db": "2",
+            "pool_class": "redis.BlockingConnectionPool",
+        },
+    }
+}

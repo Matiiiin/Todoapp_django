@@ -43,6 +43,7 @@ urlpatterns = [
     path("accounts/", include("accounts.urls")),
     path("", views.HomePageView.as_view(), name="homepage"),
     path("tasks/", include("task.urls")),
+    path("weather/", include("weather.urls")),
 ]
 swagger_routes = [
     path(
