@@ -13,8 +13,8 @@ services:
       - 8000:8000
     depends_on:
       - rabbitmq
-#    networks:
-#      - todoapp_network
+      - redis
+
   smtp4dev:
     image: rnwood/smtp4dev:v3
     restart: always
@@ -27,8 +27,7 @@ services:
     environment:
       - ServerOptions__Urls=http://*:80
       - ServerOptions__HostName=smtp4dev
-#    networks:
-#      - todoapp_network
+
   rabbitmq:
     container_name: rabbitmq
     hostname: rabbitmq
@@ -42,8 +41,7 @@ services:
     volumes:
       - ./rabbitmq/data/:/var/lib/rabbitmq/
       - ./rabbitmq/log/:/var/log/rabbitmq
-#    networks:
-#      - todoapp_network
+
   send_email_service:
     container_name: send_email_service
     restart: on-failure
@@ -61,10 +59,30 @@ services:
       - EMAIL_PORT = 25
     depends_on:
       - rabbitmq
-#    networks:
-#      - todoapp_network
-#networks:
-#  todoapp_network:
-#    name: todoapp_network
-#    driver: bridge
-#    external: true
+
+  redis:
+    image: redis
+    restart: always
+    container_name: redis
+    ports:
+      - "6379:6379"
+    command: redis-server --save 60 1 --loglevel warning
+
+  worker:
+    build: .
+    container_name: worker
+    volumes:
+      - ./core:/app
+    command: celery -A core worker -B -l INFO
+    depends_on:
+      - redis
+      - todoapp
+  beat:
+    build: .
+    container_name: beat
+    volumes:
+      - ./core:/app
+    command: celery -A core beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    depends_on:
+      - redis
+      - todoapp
