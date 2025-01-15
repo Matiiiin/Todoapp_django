@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Information - {{ weather_data.location.name }}</title>
+    <link rel="icon" type="image/x-icon" href="{{ weather_data.current.condition.icon }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header img {
+            vertical-align: middle;
+            width: 64px;
+            height: 64px;
+        }
+        .header h1 {
+            display: inline-block;
+            margin: 0;
+            padding: 0 10px;
+            font-size: 1.5rem;
+        }
+        .details {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        .details:last-child {
+            border-bottom: none;
+        }
+        .details span {
+            font-weight: bold;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="{{ weather_data.current.condition.icon }}" alt="{{ weather_data.current.condition.text }}">
+            <h1>Weather in {{ weather_data.location.name }}, {{ weather_data.location.country }}</h1>
+        </div>
+        <div class="details">
+            <span>Temperature:</span> <span>{{ weather_data.current.temp_c }}°C / {{ weather_data.current.temp_f }}°F</span>
+        </div>
+        <div class="details">
+            <span>Condition:</span> <span>{{ weather_data.current.condition.text }}</span>
+        </div>
+        <div class="details">
+            <span>Feels Like:</span> <span>{{ weather_data.current.feelslike_c }}°C / {{ weather_data.current.feelslike_f }}°F</span>
+        </div>
+        <div class="details">
+            <span>Wind:</span> <span>{{ weather_data.current.wind_kph }} kph ({{ weather_data.current.wind_dir }})</span>
+        </div>
+        <div class="details">
+            <span>Humidity:</span> <span>{{ weather_data.current.humidity }}%</span>
+        </div>
+        <div class="details">
+            <span>Pressure:</span> <span>{{ weather_data.current.pressure_mb }} mb</span>
+        </div>
+        <div class="details">
+            <span>Visibility:</span> <span>{{ weather_data.current.vis_km }} km</span>
+        </div>
+        <div class="footer">
+            Last Updated: {{ weather_data.current.last_updated }}
+        </div>
+    </div>
+</body>
+</html>
