@@ -1,7 +1,7 @@
 services:
   todoapp:
     container_name: 'todoapp'
-    restart: on-failure
+    restart: always
     build: .
     volumes:
       - ./core:/app
@@ -10,8 +10,16 @@ services:
       - RABBITMQ_USER=rabbituser
       - RABBITMQ_PASS=rabbitpass
       - WEATHERAPI_APIKEY=5e46404a6a1c4ffc8bc62545251501
+      - DEBUG=1
+      - SECRET_KEY=django-insecure-egga%5vhm(f9s3si$xh&r%xnm85dz05$3ddn!m8^+om-5270u%
+      - DB_NAME=postgres
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_HOST=todoapp_db
+      - DB_PORT=5432
     ports:
-      - 8000:8000
+      - "8000:8000"
+    command: python manage.py runserver 0.0.0.0:8000
     depends_on:
       - rabbitmq
       - redis
@@ -72,6 +80,15 @@ services:
   worker:
     build: .
     container_name: worker
+    restart: always
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=django-insecure-egga%5vhm(f9s3si$xh&r%xnm85dz05$3ddn!m8^+om-5270u%
+      - DB_NAME=postgres
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_HOST=todoapp_db
+      - DB_PORT=5432
     volumes:
       - ./core:/app
     command: celery -A core worker -B -l INFO
@@ -81,9 +98,30 @@ services:
   beat:
     build: .
     container_name: beat
+    restart: always
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=django-insecure-egga%5vhm(f9s3si$xh&r%xnm85dz05$3ddn!m8^+om-5270u%
+      - DB_NAME=postgres
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_HOST=todoapp_db
+      - DB_PORT=5432
     volumes:
       - ./core:/app
     command: celery -A core beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
     depends_on:
       - redis
       - todoapp
+  todoapp_db:
+    restart: always
+    image: postgres
+    container_name: todoapp_db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"

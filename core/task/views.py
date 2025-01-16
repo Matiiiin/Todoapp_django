@@ -12,6 +12,7 @@ from .models import Task
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponse
 from rest_framework.viewsets import GenericViewSet
+from django.urls import reverse
 
 
 # Create your views here.
@@ -54,7 +55,7 @@ def update_status(request, pk):
         if new_status in ["NEW", "DONE"]:  # Ensure valid status
             obj.status = new_status
             obj.save()
-            return redirect("task-detail", pk=pk)
+            return redirect(reverse("tasks:task-detail", kwargs={'pk':pk}))
         else:
             return HttpResponse("Invalid status", status=400)
     return HttpResponse("Invalid request method", status=405)
