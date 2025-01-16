@@ -1,0 +1,137 @@
+services:
+  todoapp:
+    container_name: todoapp
+    restart: always
+    build: .
+    volumes:
+      - ./core:/app
+      - static_volume:/app/static
+      - media_volume:/app/media
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=rabbituser
+      - RABBITMQ_PASS=rabbitpass
+      - DB_NAME=postgres
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_HOST=todoapp_db
+      - DB_PORT=5432
+      - WEATHERAPI_APIKEY=5e46404a6a1c4ffc8bc62545251501
+      - DEBUG=0
+      - SECRET_KEY=django-insecure-egga%5vhm(f9s3si$xh&r%xnm85dz05$3ddn!m8^+om-5270u%
+    expose:
+      - "8000"
+    command: >
+      sh -c "python manage.py makemigrations &&
+             python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             gunicorn core.wsgi --bind 0.0.0.0:8000"
+    depends_on:
+      - rabbitmq
+      - redis
+      - todoapp_db
+
+  rabbitmq:
+    container_name: rabbitmq
+    hostname: rabbitmq
+    image: rabbitmq:4-management
+    environment:
+      - RABBITMQ_DEFAULT_USER=rabbituser
+      - RABBITMQ_DEFAULT_PASS=rabbitpass
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - ./rabbitmq/data/:/var/lib/rabbitmq/
+      - ./rabbitmq/log/:/var/log/rabbitmq
+
+  send_email_service:
+    container_name: send_email_service
+    restart: on-failure
+    build: ./send_email_service
+    volumes:
+      - ./send_email_service:/app
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=rabbituser
+      - RABBITMQ_PASS=rabbitpass
+      - EMAIL_USE_TLS = False
+      - EMAIL_HOST = 'smtp4dev'
+      - EMAIL_HOST_USER = ''
+      - EMAIL_HOST_PASSWORD = ''
+      - EMAIL_PORT = 25
+    depends_on:
+      - rabbitmq
+
+  redis:
+    image: redis
+    restart: always
+    container_name: redis
+    ports:
+      - "6379:6379"
+    command: redis-server --save 60 1 --loglevel warning
+
+  worker:
+    build: .
+    container_name: worker
+    volumes:
+      - ./core:/app
+    command: celery -A core worker -B -l INFO
+    environment:
+      - DEBUG=0
+      - SECRET_KEY=django-insecure-egga%5vhm(f9s3si$xh&r%xnm85dz05$3ddn!m8^+om-5270u%
+      - DB_NAME=postgres
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_HOST=todoapp_db
+      - DB_PORT=5432
+    depends_on:
+      - redis
+      - todoapp
+
+  beat:
+    build: .
+    container_name: beat
+    restart: always
+    volumes:
+      - ./core:/app
+    command: celery -A core beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    environment:
+      - DEBUG=0
+      - SECRET_KEY=django-insecure-egga%5vhm(f9s3si$xh&r%xnm85dz05$3ddn!m8^+om-5270u%
+      - DB_NAME=postgres
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_HOST=todoapp_db
+      - DB_PORT=5432
+    depends_on:
+      - redis
+      - todoapp
+
+  nginx:
+    image: nginx
+    container_name: nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./default.conf:/etc/nginx/conf.d/default.conf
+      - static_volume:/home/app/static
+      - media_volume:/home/app/media
+
+  todoapp_db:
+    restart: always
+    image: postgres
+    container_name: todoapp_db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  static_volume:
+  media_volume:
