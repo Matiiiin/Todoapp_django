@@ -18,21 +18,29 @@ jobs:
 
   deploy:
     name: Deploy to Server
-    if: steps.build.outcome == 'success'
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
+      - name: Build Project
+        id: build  # Assign an ID to the build step
+        run: |
+          echo "Building project..."
+          # Add your build commands here
+          echo "Build completed."
+
       - name: Deploy via SSH
-        uses: appleboy/ssh-action@master
+        if: steps.build.outcome == 'success'  # Check if the build step was successful
+        uses: appleboy/ssh-action@v0.1.6
         with:
-          host: ${{secrets.HOST}}
+          host: ${{ secrets.HOST }}
           username: ${{ secrets.HOST_USERNAME }}
           password: ${{ secrets.HOST_PASSWORD }}
-          port: ${{secrets.HOST_PORT}}
+          port: ${{ secrets.HOST_PORT }}
           script: |
-            cd ${{secrets.PROJECT_PATH}}
+            cd ${{ secrets.PROJECT_PATH }}
             docker compose -f docker-compose-stage.yml stop
             git pull -b main
             docker compose -f docker-compose-stage.yml restart
