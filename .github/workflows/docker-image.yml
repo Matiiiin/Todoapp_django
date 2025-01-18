@@ -1,4 +1,4 @@
-name: Todoapp Docker Image CI
+name: Todoapp Docker Image CI/CD
 
 on:
   push:
@@ -7,14 +7,32 @@ on:
     branches: [ "main" ]
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v4
     - name: Build Todoapp Docker image
       run: docker compose up -d
     - name: Run tests
       run: docker exec todoapp sh -c "pytest ."
+
+  deploy:
+    name: Deploy to Server
+    if: steps.build.outcome == 'success'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{secrets.HOST}}
+          username: ${{ secrets.HOST_USERNAME }}
+          password: ${{ secrets.HOST_PASSWORD }}
+          port: ${{secrets.HOST_PORT}}
+          script: |
+            cd ${{secrets.PROJECT_PATH}}
+            docker compose -f docker-compose-stage.yml stop
+            git pull -b main
+            docker compose -f docker-compose-stage.yml restart
