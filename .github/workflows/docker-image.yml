@@ -19,7 +19,8 @@ jobs:
   deploy:
     name: Deploy to Server
     runs-on: ubuntu-latest
-
+    needs: build  # This ensures 'deploy' runs only if 'build' succeeds
+    if: success()  # Additional check to ensure the previous job succeeded
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -32,7 +33,6 @@ jobs:
           echo "Build completed."
 
       - name: Deploy via SSH
-        if: steps.build.outcome == 'success'  # Check if the build step was successful
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.HOST }}
